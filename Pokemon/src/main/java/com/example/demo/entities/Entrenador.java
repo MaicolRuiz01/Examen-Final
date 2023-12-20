@@ -38,6 +38,7 @@ public class Entrenador {
 	@ManyToOne
 	@JoinColumn(name="pueblo_id")
 	private Pueblo pueblo;
+	private String uuid;
 	
 	
 	
