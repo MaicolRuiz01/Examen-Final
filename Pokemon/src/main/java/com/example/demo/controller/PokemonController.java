@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,7 +23,7 @@ public class PokemonController {
 
     @GetMapping("/{tipo}/pokemons")
     public ResponseEntity<List<Pokemon>> listarPokemonesPorTipo(@PathVariable("tipo") String tipo) {
-        // Suponiendo que tienes un método en el repositorio para buscar Pokemones por tipo
+        
         List<Pokemon> pokemones = pokemonRepository.findByTipoPokemon_Descripcion(tipo);
 
         if (pokemones.isEmpty()) {
@@ -30,5 +32,18 @@ public class PokemonController {
 
         return ResponseEntity.ok(pokemones);
     }
+    
+    @PostMapping("/registrar")
+    public ResponseEntity<Pokemon> registrarPokemon(@RequestBody Pokemon nuevoPokemon) {
+        
+        if (nuevoPokemon.getUuid() != null && pokemonRepository.findById(nuevoPokemon.getId()) != null) {
+            return ResponseEntity.badRequest().body(null); // O podrías lanzar una excepción indicando que ya existe
+        }
+
+        Pokemon pokemonGuardado = pokemonRepository.save(nuevoPokemon);
+        return ResponseEntity.ok(pokemonGuardado);
+    }
+    
+    
 
 }
