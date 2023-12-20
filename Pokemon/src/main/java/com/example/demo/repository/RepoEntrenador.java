@@ -6,5 +6,6 @@ import com.example.demo.entities.Entrenador;
 
 public interface RepoEntrenador extends JpaRepository<Entrenador, Integer> {
 	Entrenador findByEmail(String email);
+	Entrenador findByUuid(String uuid);
 
 }

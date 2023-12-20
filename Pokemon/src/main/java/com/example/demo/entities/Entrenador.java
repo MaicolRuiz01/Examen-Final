@@ -40,7 +40,4 @@ public class Entrenador {
 	private Pueblo pueblo;
 	private String uuid;
 	
-	
-	
-
 }

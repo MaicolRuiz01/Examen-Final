@@ -35,8 +35,4 @@ public class Pokemon {
 	@OneToMany(mappedBy = "pokemon")
 	private List<Captura> capturas = new ArrayList<>();
 
-	
-	
-	
-	
 }
