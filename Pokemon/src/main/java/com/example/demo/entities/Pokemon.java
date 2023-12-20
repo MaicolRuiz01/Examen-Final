@@ -11,10 +11,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Entity
 @Data
+@AllArgsConstructor
+
 public class Pokemon {
 	
 	@Id
