@@ -19,6 +19,7 @@ import com.example.demo.entities.Entrenador;
 import com.example.demo.entities.Pokemon;
 import com.example.demo.repository.RepoCaptura;
 import com.example.demo.repository.RepoEntrenador;
+import com.example.demo.repository.RepoPokemon;
 
 @RestController
 @RequestMapping("/entrenador")
@@ -28,6 +29,8 @@ public class EntrenadorController {
 	RepoEntrenador repoentrenador;
 	@Autowired
     RepoCaptura capturaRepository;
+	@Autowired
+	RepoPokemon pokemonRepository;
 	
 	 @PostMapping("/login")
 	    public ResponseEntity<Map<String, String>> obtenerUUIDPorEmail(@RequestBody Map<String, String> requestBody) {
@@ -62,6 +65,35 @@ public class EntrenadorController {
 	        return ResponseEntity.ok(pokemones);
 	    }
 	    
+	    @PostMapping("/{entrenadorUuid}/pokemons/{pokemonUuid}")
+	    public ResponseEntity<Map<String, String>> agregarPokemonAEntrenador(
+	            @PathVariable("entrenadorUuid") String entrenadorUuid,
+	            @PathVariable("pokemonUuid") String pokemonUuid
+	    ) {
+	        Entrenador entrenador = repoentrenador.findByUuid(entrenadorUuid);
+	        Pokemon pokemon = pokemonRepository.findByUuid(pokemonUuid);
+
+	        if (entrenador == null || pokemon == null) {
+	            return ResponseEntity.notFound().build();
+	        }
+
+	        // Verificar si el Pokemon ya está asociado al Entrenador
+	        boolean yaAsociado = capturaRepository.existsByEntrenadorAndPokemon(entrenador, pokemon);
+
+	        if (yaAsociado) {
+	            Map<String, String> errorResponse = new HashMap<>();
+	            errorResponse.put("error", "true");
+	            errorResponse.put("message", "El pokemon ya está registrado al entrenador");
+	            return ResponseEntity.badRequest().body(errorResponse);
+	        }
+
+	        Captura nuevaCaptura = new Captura();
+	        nuevaCaptura.setEntrenador(entrenador);
+	        nuevaCaptura.setPokemones(pokemon);
+	        capturaRepository.save(nuevaCaptura);
+
+	        return ResponseEntity.ok().build();
+	    }
 	    
 
 }

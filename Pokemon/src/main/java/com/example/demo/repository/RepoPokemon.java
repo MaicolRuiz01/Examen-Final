@@ -8,5 +8,6 @@ import com.example.demo.entities.Pokemon;
 
 public interface RepoPokemon extends JpaRepository<Pokemon, Integer> {
 	List<Pokemon> findByTipoPokemon_Descripcion(String tipo);
+	Pokemon findByUuid(String uuid);
 
 }
