@@ -1,5 +1,6 @@
 package com.example.demo.entities;
 
+import java.io.Serializable;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 
-public class Pokemon {
+public class Pokemon implements Serializable{
 	
 	@Id
 	@SequenceGenerator(name="pokemon_id_seq",allocationSize = 1)

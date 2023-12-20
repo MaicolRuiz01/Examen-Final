@@ -1,6 +1,7 @@
 package com.example.demo.entities;
 
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import jakarta.persistence.SequenceGenerator;
 import lombok.Data;
 @Entity
 @Data
-public class TipoPokemon {
+public class TipoPokemon implements Serializable{
 	
 	@Id
 	@SequenceGenerator(name="tipo_pokemon_id_seq",allocationSize = 1)

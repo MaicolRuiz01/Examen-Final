@@ -1,5 +1,6 @@
 package com.example.demo.entities;
 
+import java.io.Serializable;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Entrenador {
+public class Entrenador implements Serializable{
 	
 	@Id
 	@SequenceGenerator(name="entrenador_id_seq",allocationSize = 1)

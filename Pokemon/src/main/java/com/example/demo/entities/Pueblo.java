@@ -2,6 +2,7 @@ package com.example.demo.entities;
 
 
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +18,7 @@ import lombok.Data;
 @Entity
 @Data
 @AllArgsConstructor
-public class Pueblo {
+public class Pueblo implements Serializable{
 	
 	@Id
 	@SequenceGenerator(name="pueblo_id_seq",allocationSize = 1)
