@@ -5,11 +5,15 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
@@ -31,14 +35,31 @@ public class Entrenador implements Serializable{
 	private String apellido;
 	private String email;
 	private Date fecha_nacimiento;
-	private Date fecha_viculacion;
-	
-	@OneToMany(mappedBy = "entrenador")
-	private List<Captura> capturas = new ArrayList<>();
+	private Date fecha_vinculacion;
+	@JsonIgnore
+	@ManyToMany
+    @JoinTable(
+        name = "captura",
+        joinColumns = @JoinColumn(name = "entrenador_id"),
+        inverseJoinColumns = @JoinColumn(name = "pokemon_id")
+    )
+    private List<Pokemon> pokemones = new ArrayList<>();
 	
 	@ManyToOne
 	@JoinColumn(name="pueblo_id")
 	private Pueblo pueblo;
 	private String uuid;
+	
+	
+	// Métodos para agregar y eliminar pokemones en la lista
+    public void agregarPokemon(Pokemon pokemon) {
+        pokemones.add(pokemon);
+        pokemon.getEntrenadores().add(this);
+    }
+
+    public void eliminarPokemon(Pokemon pokemon) {
+        pokemones.remove(pokemon);
+        pokemon.getEntrenadores().remove(this);
+    }
 	
 }

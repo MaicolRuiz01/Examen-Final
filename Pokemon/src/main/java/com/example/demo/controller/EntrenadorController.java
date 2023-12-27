@@ -6,18 +6,19 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.entities.Captura;
+
 import com.example.demo.entities.Entrenador;
 import com.example.demo.entities.Pokemon;
-import com.example.demo.repository.RepoCaptura;
 import com.example.demo.repository.RepoEntrenador;
 import com.example.demo.repository.RepoPokemon;
 
@@ -28,72 +29,91 @@ public class EntrenadorController {
 	@Autowired
 	RepoEntrenador repoentrenador;
 	@Autowired
-    RepoCaptura capturaRepository;
-	@Autowired
 	RepoPokemon pokemonRepository;
 	
-	 @PostMapping("/login")
-	    public ResponseEntity<Map<String, String>> obtenerUUIDPorEmail(@RequestBody Map<String, String> requestBody) {
-	        String email = requestBody.get("email");
+	@PostMapping("/crear")
+	public ResponseEntity<Entrenador> crearEntrenador(@RequestBody Entrenador nuevoEntrenador) {
+	    Entrenador entrenadorExistente = repoentrenador.findByEmail(nuevoEntrenador.getEmail());
 
-	        // Lógica para obtener el entrenador por email
-	        Entrenador entrenador = repoentrenador.findByEmail(email);
-
-	        if (entrenador == null) {
-	            return ResponseEntity.notFound().build();
-	        }
-
-	        Map<String, String> response = new HashMap<>();
-	        response.put("uuid", entrenador.getUuid()); // Suponiendo que la entidad Entrenador tiene un campo uuid
-
-	        return ResponseEntity.ok(response);
+	    if (entrenadorExistente != null) {
+	        return ResponseEntity.badRequest().body(null);
 	    }
+
+	    Entrenador entrenadorCreado = repoentrenador.save(nuevoEntrenador);
+	    return ResponseEntity.status(HttpStatus.CREATED).body(entrenadorCreado);
+	}
+	
+	@GetMapping("/lista")
+	public ResponseEntity<List<Entrenador>> listarEntrenadores() {
+	    List<Entrenador> entrenadores = repoentrenador.findAll();
+
+	    if (entrenadores.isEmpty()) {
+	        return ResponseEntity.noContent().build();
+	    }
+
+	    return ResponseEntity.ok(entrenadores);
+	}
+
+	
+	@PostMapping("/login")
+	public ResponseEntity<Map<String, String>> obtenerUUIDPorEmail(@RequestParam String email) {
+	    Entrenador entrenador = repoentrenador.findByEmail(email);
+
+	    if (entrenador == null) {
+	        return ResponseEntity.notFound().build();
+	    }
+
+	    Map<String, String> response = new HashMap<>();
+	    response.put("uuid", entrenador.getUuid());
+
+	    return ResponseEntity.ok(response);
+	}
+
 	 
 	 
 
-	    @GetMapping("/{uuid}/pokemons")
-	    public ResponseEntity<List<Pokemon>> listarPokemonesDeEntrenador(@PathVariable("uuid") String uuid) {
-	        Entrenador entrenador = repoentrenador.findByUuid(uuid);
+	 @GetMapping("/{uuid}/pokemons")
+	 public ResponseEntity<List<Pokemon>> listarPokemonesDeEntrenador(@PathVariable("uuid") String uuid) {
+	     Entrenador entrenador = repoentrenador.findByUuid(uuid);
 
-	        if (entrenador == null) {
-	            return ResponseEntity.notFound().build();
-	        }
+	     if (entrenador == null) {
+	         return ResponseEntity.notFound().build();
+	     }
 
-	        List<Captura> capturas = capturaRepository.findByEntrenador(entrenador);
-	        List<Pokemon> pokemones = capturas.stream().map(Captura::getPokemones).collect(Collectors.toList());
+	     List<Pokemon> pokemones = entrenador.getPokemones();
 
-	        return ResponseEntity.ok(pokemones);
-	    }
+	     return ResponseEntity.ok(pokemones);
+	 }
+
 	    
-	    @PostMapping("/{entrenadorUuid}/pokemons/{pokemonUuid}")
-	    public ResponseEntity<Map<String, String>> agregarPokemonAEntrenador(
-	            @PathVariable("entrenadorUuid") String entrenadorUuid,
-	            @PathVariable("pokemonUuid") String pokemonUuid
-	    ) {
-	        Entrenador entrenador = repoentrenador.findByUuid(entrenadorUuid);
-	        Pokemon pokemon = pokemonRepository.findByUuid(pokemonUuid);
+	 @PostMapping("/{entrenadorUuid}/pokemons/{pokemonUuid}")
+	 public ResponseEntity<String> agregarPokemonAEntrenador(
+	         @PathVariable("entrenadorUuid") String entrenadorUuid,
+	         @PathVariable("pokemonUuid") String pokemonUuid) {
 
-	        if (entrenador == null || pokemon == null) {
-	            return ResponseEntity.notFound().build();
-	        }
+	     Entrenador entrenador = repoentrenador.findByUuid(entrenadorUuid);
+	     Pokemon pokemon = pokemonRepository.findByUuid(pokemonUuid);
 
-	        // Verificar si el Pokemon ya está asociado al Entrenador
-	        boolean yaAsociado = capturaRepository.existsByEntrenadorAndPokemon(entrenador, pokemon);
+	     if (entrenador == null || pokemon == null) {
+	         return ResponseEntity.notFound().build();
+	     }
 
-	        if (yaAsociado) {
-	            Map<String, String> errorResponse = new HashMap<>();
-	            errorResponse.put("error", "true");
-	            errorResponse.put("message", "El pokemon ya está registrado al entrenador");
-	            return ResponseEntity.badRequest().body(errorResponse);
-	        }
+	     List<Pokemon> pokemonesEntrenador = entrenador.getPokemones();
 
-	        Captura nuevaCaptura = new Captura();
-	        nuevaCaptura.setEntrenador(entrenador);
-	        nuevaCaptura.setPokemones(pokemon);
-	        capturaRepository.save(nuevaCaptura);
+	     // Verificar si el Pokemon ya está asociado al Entrenador
+	     boolean yaAsociado = pokemonesEntrenador.contains(pokemon);
 
-	        return ResponseEntity.ok().build();
-	    }
+	     if (yaAsociado) {
+	         return ResponseEntity.badRequest().body("El pokemon ya está registrado al entrenador");
+	     }
+
+	     pokemonesEntrenador.add(pokemon);
+	     repoentrenador.save(entrenador);
+
+	     return ResponseEntity.ok().build();
+	 }
+
+
 	    
 
 }

@@ -6,6 +6,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,9 +17,11 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 @Entity
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class Pueblo implements Serializable{
 	
 	@Id
@@ -26,7 +30,8 @@ public class Pueblo implements Serializable{
 	private Integer id;
 	private String nombre;
 	private String uuid;
-	@OneToMany(mappedBy = "tipo_pokemon", cascade = CascadeType.ALL)
-    private List<Pokemon> pokemons = new ArrayList<>();
+	@JsonIgnore
+	@OneToMany(mappedBy = "pueblo", cascade = CascadeType.ALL)
+    private List<Entrenador> entrenadores = new ArrayList<>();
 
 }
